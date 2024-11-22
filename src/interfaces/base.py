@@ -315,10 +315,12 @@ class TextBase(object):
         return aster, aster_info
 
     def parse_aster_data(self, imgs_input):
+        device = torch.device("cuda" if torch.cuda.is_available() else 
+                      "mps" if torch.backends.mps.is_available() else "cpu")
         cfg = self.config.TRAIN
         aster_info = AsterInfo(cfg.voc_type)
         input_dict = {}
-        images_input = imgs_input.to(self.device)
+        images_input = imgs_input.to(device)
         input_dict['images'] = images_input * 2 - 1
         batch_size = images_input.shape[0]
         input_dict['rec_targets'] = torch.IntTensor(batch_size, aster_info.max_len).fill_(1)
