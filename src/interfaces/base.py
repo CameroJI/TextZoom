@@ -46,7 +46,8 @@ class TextBase(object):
             self.load_dataset = lmdbDataset_real
         self.resume = args.resume if args.resume is not None else config.TRAIN.resume
         self.batch_size = args.batch_size if args.batch_size is not None else self.config.TRAIN.batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else 
+                      "mps" if torch.backends.mps.is_available() else "cpu")
         alpha_dict = {
             'digit': string.digits,
             'lower': string.digits + string.ascii_lowercase,
@@ -244,8 +245,14 @@ class TextBase(object):
     def MORAN_init(self):
         cfg = self.config.TRAIN
         alphabet = ':'.join(string.digits+string.ascii_lowercase+'$')
+        device = torch.device("mps" if torch.has_mps else "cuda" if torch.cuda.is_available() else "cpu")
+        input_data_type = {
+            "cuda": torch.cuda.FloatTensor,
+            "mps": torch.float32,
+            "cpu": torch.FloatTensor,
+        }[device.type]
         MORAN = moran.MORAN(1, len(alphabet.split(':')), 256, 32, 100, BidirDecoder=True,
-                            inputDataType='torch.cuda.FloatTensor', CUDA=True)
+                            inputDataType=input_data_type, CUDA=True)
         model_path = self.config.TRAIN.VAL.moran_pretrained
         print('loading pre-trained moran model from %s' % model_path)
         state_dict = torch.load(model_path)
@@ -293,15 +300,18 @@ class TextBase(object):
         return tensor
 
     def Aster_init(self):
+        device = torch.device("mps" if torch.has_mps else "cuda" if torch.cuda.is_available() else "cpu")
         cfg = self.config.TRAIN
         aster_info = AsterInfo(cfg.voc_type)
         aster = recognizer.RecognizerBuilder(arch='ResNet_ASTER', rec_num_classes=aster_info.rec_num_classes,
                                              sDim=512, attDim=512, max_len_labels=aster_info.max_len,
                                              eos=aster_info.char2id[aster_info.EOS], STN_ON=True)
-        aster.load_state_dict(torch.load(self.config.TRAIN.VAL.rec_pretrained)['state_dict'])
+        pretrained_model = torch.load(self.config.TRAIN.VAL.rec_pretrained, map_location=device)
+        aster.load_state_dict(pretrained_model['state_dict'])
         print('load pred_trained aster model from %s' % self.config.TRAIN.VAL.rec_pretrained)
-        aster = aster.to(self.device)
-        aster = torch.nn.DataParallel(aster, device_ids=range(cfg.ngpu))
+        aster = aster.to(device)
+        if cfg.ngpu > 1:
+            aster = torch.nn.DataParallel(aster, device_ids=range(cfg.ngpu))
         return aster, aster_info
 
     def parse_aster_data(self, imgs_input):

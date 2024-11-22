@@ -3,8 +3,8 @@ MODEL:
 
 TRAIN:
   train_data_dir: [
-    '../dataset/lmdb/str/TextZoom/train1',
-    '../dataset/lmdb/str/TextZoom/train2',
+    'dataset/lmdb/str/TextZoom/train1',
+    'dataset/lmdb/str/TextZoom/train2',
   ]
   batch_size: 512
   width: 128
@@ -12,7 +12,7 @@ TRAIN:
   epochs: 500
   cuda: True
   ngpu: 4
-  workers: 2
+  workers: 0
   resume: ''
   ckpt_dir: './ckpt/'
   voc_type: 'all' #'digits lower upper all'
@@ -29,9 +29,9 @@ TRAIN:
 
   VAL:
     val_data_dir: [
-      '../dataset/lmdb/str/TextZoom/test/hard',
-      '../dataset/lmdb/str/TextZoom/test/easy',
-      '../dataset/lmdb/str/TextZoom/test/medium',
+      'dataset/lmdb/str/TextZoom/test/hard',
+      'dataset/lmdb/str/TextZoom/test/easy',
+      'dataset/lmdb/str/TextZoom/test/medium',
     ]
     n_vis: 10
     vis_dir: 'demo'

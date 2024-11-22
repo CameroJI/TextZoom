@@ -24,6 +24,8 @@ from utils.metrics import get_str_list, Accuracy
 from utils.util import str_filt
 from utils import utils_moran
 
+device = torch.device("cuda" if torch.cuda.is_available() else 
+                      "mps" if torch.backends.mps.is_available() else "cpu")
 
 class TextSR(base.TextBase):
     def train(self):
@@ -151,7 +153,8 @@ class TextSR(base.TextBase):
             loss_im = image_crit(images_sr, images_hr).mean()
             loss_rec = aster_output_sr['losses']['loss_rec'].mean()
             sum_images += val_batch_size
-            torch.cuda.empty_cache()
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
         psnr_avg = sum(metric_dict['psnr']) / len(metric_dict['psnr'])
         ssim_avg = sum(metric_dict['ssim']) / len(metric_dict['ssim'])
         print('[{}]\t'
@@ -240,7 +243,8 @@ class TextSR(base.TextBase):
                 if str_filt(pred, 'lower') == str_filt(target, 'lower'):
                     n_correct += 1
             sum_images += val_batch_size
-            torch.cuda.empty_cache()
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
             print('Evaluation: [{}][{}/{}]\t'
                   .format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                           i + 1, len(test_loader), ))
@@ -341,7 +345,8 @@ class TextSR(base.TextBase):
                 preds_size = torch.IntTensor([crnn_output_lr.size(0)] * val_batch_size)
                 pred_str_lr = self.converter_crnn.decode(preds_lr.data, preds_size.data, raw=False)
             print(pred_str_lr, '===>', pred_str_sr)
-            torch.cuda.empty_cache()
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
         sum_images = len(os.listdir(self.args.demo_dir))
         time_end = time.time()
         fps = sum_images / (time_end - time_begin)
