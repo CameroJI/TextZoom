@@ -142,8 +142,12 @@ class TextSR(base.TextBase):
             metric_dict['ssim'].append(self.cal_ssim(images_sr, images_hr))
             aster_dict_sr = self.parse_aster_data(images_sr[:, :3, :, :])
             aster_dict_lr = self.parse_aster_data(images_lr[:, :3, :, :])
-            aster_dict_lr = aster_dict_lr.to(device)
-            aster_dict_sr = aster_dict_sr.to(device)
+            for key in aster_dict_sr:
+                aster_dict_sr[key] = aster_dict_sr[key].to(device)
+            for key in aster_dict_lr:
+                aster_dict_lr[key] = aster_dict_lr[key].to(device)
+            aster_output_lr = aster(aster_dict_lr)
+            aster_output_sr = aster(aster_dict_sr)
             pred_rec_lr = aster_output_lr['output']['pred_rec']
             pred_rec_sr = aster_output_sr['output']['pred_rec']
             pred_str_lr, _ = get_str_list(pred_rec_lr, aster_dict_lr['rec_targets'], dataset=aster_info)
