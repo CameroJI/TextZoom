@@ -185,11 +185,9 @@ class TextBase(object):
             vis_im = torch.stack(images)
             vis_im = torchvision.utils.make_grid(vis_im, nrow=1, padding=0)
             out_root = os.path.join('./demo', self.vis_dir)
-            if not os.path.exists(out_root):
-                os.mkdir(out_root)
+            os.makedirs(out_root, exist_ok=True)
             out_path = os.path.join(out_root, str(index))
-            if not os.path.exists(out_path):
-                os.mkdir(out_path)
+            os.makedirs(out_path, exist_ok=True)
             im_name = pred_str_lr[i] + '_' + pred_str_sr[i] + '_' + label_strs[i] + '_.png'
             im_name = im_name.replace('/', '')
             if index is not 0:
