@@ -151,8 +151,8 @@ class TextBase(object):
             model = model.to(self.device)
             image_crit.to(self.device)
             if cfg.ngpu >= 1:
-                model = torch.nn.DataParallel(model, device_ids=[0])
-                image_crit = torch.nn.DataParallel(image_crit, device_ids=[0])
+                model = torch.nn.DataParallel(model, device_ids=range(cfg.ngpu))
+                image_crit = torch.nn.DataParallel(image_crit, device_ids=range(cfg.ngpu))
             if self.resume is not '':
                 print('loading pre-trained model from %s ' % self.resume)
                 if self.config.TRAIN.ngpu == 1:
@@ -262,7 +262,7 @@ class TextBase(object):
             MORAN_state_dict_rename[name] = v
         MORAN.load_state_dict(MORAN_state_dict_rename)
         MORAN = MORAN.to(self.device)
-        MORAN = torch.nn.DataParallel(MORAN, device_ids=[0])
+        MORAN = torch.nn.DataParallel(MORAN, device_ids=range(cfg.ngpu))
         for p in MORAN.parameters():
             p.requires_grad = False
         MORAN.eval()
@@ -311,7 +311,7 @@ class TextBase(object):
         print('load pred_trained aster model from %s' % self.config.TRAIN.VAL.rec_pretrained)
         aster = aster.to(device)
         if cfg.ngpu > 1:
-            aster = torch.nn.DataParallel(aster, device_ids=[0])
+            aster = torch.nn.DataParallel(aster, device_ids=range(cfg.ngpu))
         return aster, aster_info
 
     def parse_aster_data(self, imgs_input):
