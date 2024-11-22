@@ -5,6 +5,9 @@ from torch import nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+device = torch.device("cuda" if torch.cuda.is_available() else 
+                      "mps" if torch.backends.mps.is_available() else "cpu")
+
 def to_contiguous(tensor):
   if tensor.is_contiguous():
     return tensor
@@ -47,7 +50,7 @@ class SequenceCrossEntropyLoss(nn.Module):
     mask =  mask[:, :max_length]
     input = to_contiguous(input).view(-1, input.size(2))
     input = F.log_softmax(input, dim=1)
-    target = to_contiguous(target).view(-1, 1)
+    target = to_contiguous(target).view(-1, 1).to(input.device)
     mask = to_contiguous(mask).view(-1, 1)
     
     print(f"Input device: {input.device}")
