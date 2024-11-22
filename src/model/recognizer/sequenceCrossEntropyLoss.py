@@ -53,11 +53,6 @@ class SequenceCrossEntropyLoss(nn.Module):
     target = to_contiguous(target).view(-1, 1).to(input.device)
     mask = to_contiguous(mask).view(-1, 1)
     
-    print(f"Input device: {input.device}")
-    print(f"Target device: {target.device}")
-    print(f"Mask device: {mask.device}")
-    print(f"Gather operation input: {input.shape}, target: {target.shape}, mask: {mask.shape}")
-    
     output = - input.gather(1, target.long()) * mask
     # if self.size_average:
     #   output = torch.sum(output) / torch.sum(mask)
