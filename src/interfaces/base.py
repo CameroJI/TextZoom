@@ -224,15 +224,20 @@ class TextBase(object):
 
     def save_checkpoint(self, netG, epoch, iters, best_acc_dict, best_model_info, is_best, converge_list):
         ckpt_path = os.path.join('ckpt', self.vis_dir)
-        if not os.path.exists(ckpt_path):
-            os.mkdir(ckpt_path)
+        os.makedirs(ckpt_path, exist_ok=True)
         save_dict = {
-            'state_dict_G': netG.module.state_dict(),
-            'info': {'arch': self.args.arch, 'iters': iters, 'epochs': epoch, 'batch_size': self.batch_size,
-                     'voc_type': self.voc_type, 'up_scale_factor': self.scale_factor},
+            'state_dict_G': netG.module.state_dict() if hasattr(netG, 'module') else netG.state_dict(),
+            'info': {
+                'arch': self.args.arch,
+                'iters': iters,
+                'epochs': epoch,
+                'batch_size': self.batch_size,
+                'voc_type': self.voc_type,
+                'up_scale_factor': self.scale_factor
+            },
             'best_history_res': best_acc_dict,
             'best_model_info': best_model_info,
-            'param_num': sum([param.nelement() for param in netG.module.parameters()]),
+            'param_num': sum([param.nelement() for param in netG.parameters()]),
             'converge': converge_list
         }
         if is_best:
