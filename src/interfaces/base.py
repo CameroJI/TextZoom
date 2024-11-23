@@ -241,9 +241,11 @@ class TextBase(object):
             'converge': converge_list
         }
         if is_best:
-            torch.save(save_dict, os.path.join(ckpt_path, 'model_best.pth'))
+            torch.save(save_dict, os.path.join(ckpt_path, 'model_best_dict.pth'))
+            torch.save(netG, os.path.join(ckpt_path, 'model_best.pth'))
         else:
-            torch.save(save_dict, os.path.join(ckpt_path, 'checkpoint.pth'))
+            torch.save(save_dict, os.path.join(ckpt_path, 'checkpoint_dict.pth'))
+            torch.save(netG, os.path.join(ckpt_path, 'checkpoint.pth'))
 
     def MORAN_init(self):
         cfg = self.config.TRAIN
