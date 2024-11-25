@@ -162,9 +162,8 @@ class TextBase(object):
                     model.load_state_dict(model_state['state_dict_G'])
                 else:
                     model_state = torch.load(self.resume, map_location=self.device, weights_only=False)
-                    print(model_state)
-                    #model.load_state_dict(model_state['state_dict_G'])
-        return {'model': model_state, 'crit': image_crit}
+                    model.load_state_dict(model_state['state_dict_G'])
+        return {'model': model, 'crit': image_crit}
 
     def optimizer_init(self, model):
         cfg = self.config.TRAIN
