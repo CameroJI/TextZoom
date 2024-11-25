@@ -115,6 +115,8 @@ class TextBase(object):
         return test_dataset, test_loader
 
     def generator_init(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else 
+                      "mps" if torch.backends.mps.is_available() else "cpu")
         cfg = self.config.TRAIN
         if self.args.arch == 'tsrn':
             model = tsrn.TSRN(scale_factor=self.scale_factor, width=cfg.width, height=cfg.height,
@@ -153,21 +155,22 @@ class TextBase(object):
             if cfg.ngpu >= 1:
                 model = torch.nn.DataParallel(model, device_ids=[0])
                 image_crit = torch.nn.DataParallel(image_crit, device_ids=[0])
-            if self.resume is not '':
+            if self.resume != '':
                 print('loading pre-trained model from %s ' % self.resume)
                 if self.config.TRAIN.ngpu == 1:
-                    model.load_state_dict(torch.load(self.resume)['state_dict_G'])
+                    model_state = torch.load(self.resume, map_location=device)
+                    model.load_state_dict(model_state['state_dict_G'])
                 else:
-                    model.load_state_dict(
-                        {'module.' + k: v for k, v in torch.load(self.resume)['state_dict_G'].items()})
-        return {'model': model, 'crit': image_crit}
+                    model_state = torch.load(self.resume, map_location=self.device, weights_only=False)
+                    print(model_state)
+                    #model.load_state_dict(model_state['state_dict_G'])
+        return {'model': model_state, 'crit': image_crit}
 
     def optimizer_init(self, model):
         cfg = self.config.TRAIN
         optimizer = optim.Adam(model.parameters(), lr=cfg.lr,
                                betas=(cfg.beta1, 0.999))
         return optimizer
-
     def tripple_display(self, image_in, image_out, image_target, pred_str_lr, pred_str_sr, label_strs, index):
         for i in (range(min(image_in.shape[0], self.config.TRAIN.VAL.n_vis) )):
             # embed()
@@ -190,7 +193,7 @@ class TextBase(object):
             os.makedirs(out_path, exist_ok=True)
             im_name = pred_str_lr[i] + '_' + pred_str_sr[i] + '_' + label_strs[i] + '_.png'
             im_name = im_name.replace('/', '')
-            if index is not 0:
+            if index != 0:
                 torchvision.utils.save_image(vis_im, os.path.join(out_path, im_name), padding=0)
 
     def test_display(self, image_in, image_out, image_target, pred_str_lr, pred_str_sr, label_strs, str_filt):
