@@ -7,8 +7,8 @@ TRAIN:
     'dataset/lmdb/str/TextZoom/train2',
   ]
   batch_size: 512
-  width: 128
-  height: 32
+  width: 224
+  height: 128
   epochs: 500
   cuda: True
   ngpu: 0

@@ -48,7 +48,8 @@ class TextSR(base.TextBase):
         best_model_ssim = copy.deepcopy(best_history_acc)
         best_acc = 0
         converge_list = []
-
+        best_cnt = 0
+        best_max = 50
         for epoch in range(cfg.epochs):
             for j, data in (enumerate(train_loader)):
                 model.train()
@@ -115,6 +116,15 @@ class TextSR(base.TextBase):
                         best_model_info = {'accuracy': best_model_acc, 'psnr': best_model_psnr, 'ssim': best_model_ssim}
                         print('saving best model')
                         self.save_checkpoint(model, epoch, iters, best_history_acc, best_model_info, True, converge_list)
+                        best_cnt = 0
+                    else:
+                        best_cnt += 1
+                        if best_cnt >= best_max:
+                            best_cnt = 0
+                            ckpt_path = os.path.join('ckpt', self.vis_dir)
+                            model_state = torch.load(ckpt_path, map_location=self.device, weights_only=False)
+                            model.load_state_dict(model_state['state_dict_G'])
+                            print('Max best model ')
 
                 if iters % cfg.saveInterval == 0:
                     best_model_info = {'accuracy': best_model_acc, 'psnr': best_model_psnr, 'ssim': best_model_ssim}
