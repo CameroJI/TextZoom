@@ -2,7 +2,4 @@
 .DS_Store
 *.pth
 *.tar
-*.pyc
-*.pyc
 *.yaml
-*.pyc
