@@ -49,7 +49,7 @@ class TextSR(base.TextBase):
         best_acc = 0
         converge_list = []
         best_cnt = 0
-        best_max = 50
+        best_max = 20
         for epoch in range(cfg.epochs):
             for j, data in (enumerate(train_loader)):
                 model.train()
