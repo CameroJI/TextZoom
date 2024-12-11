@@ -29,6 +29,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else
 
 class TextSR(base.TextBase):
     def train(self):
+        ckpt_path = os.path.join('./ckpt', self.vis_dir, 'model_best_dict.pth')
+        print(os.path.exists(ckpt_path))
         cfg = self.config.TRAIN
         train_dataset, train_loader = self.get_train_data()
         val_dataset_list, val_loader_list = self.get_val_data()
@@ -121,7 +123,7 @@ class TextSR(base.TextBase):
                         best_cnt += 1
                         if best_cnt >= best_max:
                             best_cnt = 0
-                            ckpt_path = os.path.join('ckpt', self.vis_dir)
+                            ckpt_path = os.path.join('./ckpt', self.vis_dir, 'model_best_dict.pth')
                             model_state = torch.load(ckpt_path, map_location=self.device, weights_only=False)
                             model.load_state_dict(model_state['state_dict_G'])
                             print('Max best model ')
