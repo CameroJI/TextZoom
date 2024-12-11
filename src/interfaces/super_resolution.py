@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else
 
 class TextSR(base.TextBase):
     def train(self):
-        ckpt_path = os.path.join('ckpt', self.vis_dir, 'model_best_dict.pth')
+        ckpt_path = os.path.join('./ckpt', self.vis_dir, 'model_best_dict.pth')
         print(ckpt_path, os.path.exists(ckpt_path))
         cfg = self.config.TRAIN
         train_dataset, train_loader = self.get_train_data()
